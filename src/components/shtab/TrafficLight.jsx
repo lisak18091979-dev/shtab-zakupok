@@ -9,10 +9,10 @@ import { newItem, uid } from '@/lib/shtab/defaults';
 import { fmt, fmtNum } from '@/lib/shtab/calc';
 
 const HEAD = ['Позиция', 'Остаток', 'Расход в сутки', 'Запас, дн.', 'Замена, дн.', 'Цена дня простоя, млн ₽', 'Без поставки', 'Непокрыто', 'Статус', 'Риск, млн ₽', ''];
-const FILTERS = ['Все', 'Красное', 'Жёлтое', 'Зелёное'];
+const FILTERS = ['Все', 'Красное', 'Жёлтое', 'Зелёное', 'Неполные данные'];
 const FKEY = { Красное: 'red', Жёлтое: 'yellow', Зелёное: 'green' };
 const n = (v) => parseFloat(String(v ?? '').replace(/\s/g, '').replace(',', '.')) || 0;
-const effectOf = (t) => { const x = String(t || '').toLowerCase(); return x.startsWith('ост') ? 'Остановит линию' : x.startsWith('зам') && x.includes('сраз') ? 'Заменим сразу' : 'Замедлит'; };
+const effectOf = (t) => { const x = String(t || '').toLowerCase(); return !x.trim() ? '' : x.startsWith('ост') ? 'Остановит линию' : x.startsWith('зам') && x.includes('сраз') ? 'Заменим сразу' : 'Замедлит'; };
 
 export default function TrafficLight({ state, patch, a }) {
   const [filter, setFilter] = useState('Все');
@@ -31,7 +31,7 @@ export default function TrafficLight({ state, patch, a }) {
     setRaw(''); setPaste(false);
   };
 
-  let rows = a.rows.filter((r) => filter === 'Все' || r.status === FKEY[filter] || !r.name.trim());
+  let rows = a.rows.filter((r) => filter === 'Все' || (filter === 'Неполные данные' ? r.incomplete : r.status === FKEY[filter]) || !r.name.trim());
   if (byRisk) rows = [...rows].sort((x, y) => y.risk - x.risk);
   const plan = a.byOwner.map(([o, list]) => `${o}: ${list.map((r) => r.name + (r.nextStep ? ' (' + r.nextStep + ')' : '')).join('; ')}`).join('\n');
 
@@ -41,8 +41,8 @@ export default function TrafficLight({ state, patch, a }) {
       title="Что может остановить линию"
       note="Красное: непокрытые дни есть и позиция остановит линию. Жёлтое: непокрытые дни есть. Зелёное: запаса хватает, не трогаем. Если указаны остаток и расход в сутки, запас в днях считается сам."
       right={<div className="flex gap-6">
-        <ChipGroup label="Замедление, % цены дня" options={[25, 50, 75]} value={state.params.slowShare} onChange={setParam('slowShare')} />
-        <ChipGroup label="Людей в закупках" options={[1, 2, 3, 4, 5, 6]} value={state.params.people} onChange={setParam('people')} />
+        <ChipGroup label="Замедление, доля цены дня, %" options={[25, 50, 75]} value={state.params.slowShare} onChange={setParam('slowShare')} />
+        <ChipGroup label="Число людей в закупках" options={[1, 2, 3, 4, 5, 6]} value={state.params.people} onChange={setParam('people')} />
       </div>}
     >
       <TodayCard a={a} people={state.params.people} />
@@ -89,6 +89,7 @@ export default function TrafficLight({ state, patch, a }) {
       {paste && (
         <div className="mt-4 bg-cream-paper border border-cream-2 p-5 max-w-3xl">
           <p className="text-sm font-semibold">Скопируйте строки из Excel и вставьте сюда. Порядок столбцов:</p>
+          <p className="text-xs text-muted-foreground mt-1">Неизвестные значения оставьте пустыми. Не заменяйте неизвестное нулём.</p>
           <p className="text-xs text-muted-foreground mt-1">Позиция · Поставщик · Единица · Остаток · Расход в сутки · Дней на замену · Цена дня простоя, млн ₽ · Влияние (остановит, замедлит или заменим сразу)</p>
           <textarea className="field mt-3 min-h-[120px]" value={raw} onChange={(e) => setRaw(e.target.value)} placeholder="Вставьте строки из таблицы" />
           <div className="mt-3 flex gap-3">

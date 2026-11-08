@@ -3,10 +3,21 @@ import { DEFAULT_STATE, EXAMPLE_STATE } from './defaults';
 
 const KEY = 'shtab-zakupok-v2';
 const fresh = () => structuredClone(DEFAULT_STATE);
+const loadSaved = () => {
+  try {
+    const saved = JSON.parse(localStorage.getItem(KEY) || '{}');
+    if (saved.three && Object.values(saved.three).every((v) => Number(v) === 0)) {
+      saved.three = Object.fromEntries(Object.keys(DEFAULT_STATE.three).map((k) => [k, null]));
+    }
+    return { ...fresh(), ...saved };
+  } catch {
+    return fresh();
+  }
+};
 
 // Данные штаба хранятся только в этом браузере
 export default function useShtab() {
-  const [state, setState] = useState(() => { try { return { ...fresh(), ...JSON.parse(localStorage.getItem(KEY) || '{}') }; } catch { return fresh(); } });
+  const [state, setState] = useState(loadSaved);
   const [isExample, setIsExample] = useState(false);
 
   useEffect(() => {
@@ -16,9 +27,7 @@ export default function useShtab() {
   const patch = (key, val) => setState((s) => ({ ...s, [key]: typeof val === 'function' ? val(s[key]) : val }));
   const loadExample = () => { setState(structuredClone(EXAMPLE_STATE)); setIsExample(true); };
   const returnToMyData = () => {
-    let saved = fresh();
-    try { saved = { ...fresh(), ...JSON.parse(localStorage.getItem(KEY) || '{}') }; } catch {}
-    setState(saved); setIsExample(false);
+    setState(loadSaved()); setIsExample(false);
   };
   const reset = () => { localStorage.removeItem(KEY); setState(fresh()); setIsExample(false); };
 

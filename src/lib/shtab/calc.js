@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { PLAN_30, STEPS_72 } from './defaults';
+import { LEVELS, PLAN_30, STEPS_72 } from './defaults';
 
 export const fmt = (n) => {
   const a = Math.abs(n || 0);
@@ -10,51 +10,79 @@ export const fmt = (n) => {
 };
 export const fmtNum = (n) => (n || 0).toLocaleString('ru-RU', { maximumFractionDigits: 1 });
 
-const factor = (effect, slow) => (effect === 'Остановит линию' ? 1 : effect === 'Замедлит' ? slow / 100 : 0);
-const sum = (rows, k) => rows.reduce((s, r) => s + r[k], 0);
+const factor = (effect, slow) => (effect === 'Остановит линию' ? 1 : effect === 'Замедлит' ? (slow == null ? null : slow / 100) : 0);
+const sumKnown = (rows, k) => rows.reduce((s, r) => s + (Number.isFinite(r[k]) ? r[k] : 0), 0);
 
 export function analyze(state) {
   const { params: p, three: t } = state;
   const rows = state.items.map((it) => {
-    const auto = (+it.onhand || 0) > 0 && (+it.perday || 0) > 0;
-    const stock = auto ? Math.round((it.onhand / it.perday) * 10) / 10 : +it.stock || 0, cost = +it.dayCost || 0, f = factor(it.effect, p.slowShare);
-    const unc = Math.max(0, (+it.replace || 0) - stock);
-    const status = unc === 0 ? 'green' : it.effect === 'Остановит линию' ? 'red' : 'yellow';
-    return { ...it, name: it.name || '', auto, stock, unc, status, risk: unc * cost * f, loss: Math.max(0, p.breakDays - stock) * cost * f };
+    const auto = it.onhand != null && +it.perday > 0;
+    const stockKnown = auto || it.stock != null;
+    const stock = auto ? Math.round((+it.onhand / +it.perday) * 10) / 10 : (+it.stock || 0);
+    const replacementKnown = it.replace != null, effectKnown = ['Остановит линию', 'Замедлит', 'Заменим сразу'].includes(it.effect);
+    const costKnown = it.dayCost != null && +it.dayCost > 0, cost = +it.dayCost || 0, f = factor(it.effect, p.slowShare);
+    const complete = stockKnown && replacementKnown && effectKnown;
+    const unc = complete ? Math.max(0, (+it.replace || 0) - stock) : null;
+    const missing = [];
+    if (!stockKnown) missing.push('внести остаток и расход в сутки или запас в днях');
+    if (!replacementKnown) missing.push('уточнить срок замены');
+    if (!effectKnown) missing.push('уточнить влияние на производство');
+    if (complete && unc > 0 && it.effect !== 'Заменим сразу' && !costKnown) missing.push('внести цену дня простоя');
+    if (complete && unc > 0 && it.effect === 'Замедлит' && p.slowShare == null) missing.push('выбрать долю потери мощности');
+    if (complete && p.breakDays != null && p.breakDays > stock && it.effect === 'Замедлит' && p.slowShare == null && !missing.includes('выбрать долю потери мощности')) missing.push('выбрать долю потери мощности');
+    const status = !complete ? 'unknown' : unc === 0 ? 'green' : it.effect === 'Остановит линию' ? 'red' : 'yellow';
+    const risk = !complete ? null : unc === 0 || f === 0 ? 0 : f == null || !costKnown ? null : unc * cost * f;
+    const lossDays = p.breakDays == null || !stockKnown ? null : Math.max(0, p.breakDays - stock);
+    const loss = lossDays == null ? null : lossDays === 0 ? 0 : !complete ? null : f === 0 ? 0 : f == null || !costKnown ? null : lossDays * cost * f;
+    return {
+      ...it, name: it.name || '', auto, stock, stockKnown, unc, status, missing, incomplete: missing.length > 0,
+      risk, loss,
+    };
   });
   const valid = rows.filter((r) => r.name.trim());
   const reds = valid.filter((r) => r.status === 'red');
+  const unknown = valid.filter((r) => r.incomplete);
   const ebitda = (t.spend * t.price * t.real) / 10000;
   const cash = (t.spend / 365) * (t.defer + t.stock);
   const interest = (cash * t.rate) / 100;
   const riskCut = Math.max(0, t.d0 - t.d1) * t.dayc;
-  const total = ebitda + interest + riskCut;
-  const overload = reds.length > p.people * 3;
+  const riskUnknown = valid.filter((r) => r.risk == null).length;
+  const lossUnknown = valid.filter((r) => r.loss == null).length;
+  const overload = p.people != null && reds.length > p.people * 3;
+  const yellows = valid.filter((r) => r.status === 'yellow').length;
+  const uncontrolled = reds.some((r) => !r.owner?.trim() || !r.nextStep?.trim());
+  const level = !valid.length ? 'empty'
+    : overload ? 'overload'
+    : uncontrolled ? 'unassigned'
+    : unknown.length ? 'incomplete'
+    : reds.length ? 'managed'
+    : yellows ? 'watch' : 'stable';
   const step = (list, done) => list.find((_, i) => !done[i])?.[1];
   return {
-    rows, valid, reds,
+    rows, valid, reds, unknown,
+    yellows,
     greens: valid.filter((r) => r.status === 'green').length,
-    risk: sum(valid, 'risk'), loss: sum(valid, 'loss'),
+    risk: sumKnown(valid, 'risk'), loss: sumKnown(valid, 'loss'), riskUnknown, lossUnknown,
     byOwner: Object.entries(reds.reduce((m, r) => { const k = (r.owner || '').trim() || 'Не назначен'; (m[k] = m[k] || []).push(r); return m; }, {})),
-    today: [...reds].sort((a, b) => b.risk - a.risk)[0],
+    today: [...reds].sort((a, b) => (b.risk || 0) - (a.risk || 0))[0],
     falling: valid.filter((r) => r.loss > 0).sort((a, b) => a.stock - b.stock)[0],
-    ebitda, cash, interest, riskCut, total, perDay: Math.round((total * 1e6) / 365),
+    ebitda, cash, interest, riskCut,
     pending: state.decisions.filter((d) => d.status === 'Ждёт решения').length,
     done30: PLAN_30.filter((_, i) => state.done30[i]).length,
     done72: STEPS_72.filter((_, i) => state.done72[i]).length,
     step30: step(PLAN_30, state.done30), step72: step(STEPS_72, state.done72),
-    overload, level: reds.length === 0 ? 'stable' : overload ? 'overload' : 'managed',
+    overload, level,
   };
 }
 
 export function briefText(state, a) {
   const last = state.journal.slice(-3).reverse().map((j) => j.text);
-  const cond = a.level === 'stable' ? 'стабильное' : a.level === 'overload' ? 'напряжённое, красного больше, чем рук' : 'управляемое';
+  const cond = LEVELS[a.level].label.toLocaleLowerCase('ru-RU');
   return [
     `Сводка по закупкам на ${format(new Date(), 'dd.MM.yyyy')}`, '',
     `Состояние: ${cond}.`, `Красных позиций: ${a.reds.length}.`,
-    `Риск, не закрытый запасом: ${fmt(a.risk)}.`,
-    ...(a.reds.length ? ['', 'Красные позиции:', ...[...a.reds].sort((x, y) => y.risk - x.risk).map((r) => `• ${r.name}: запас ${fmtNum(r.stock)} дн., замена ${fmtNum(+r.replace)} дн., риск ${fmt(r.risk)}${r.owner ? ', ведёт ' + r.owner : ''}${r.nextStep ? '. ' + r.nextStep : ''}`), ''] : []), `Шагов плана выполнено: ${a.done30} из ${PLAN_30.length}.`, '',
+    `Риск, не закрытый запасом: ${fmt(a.risk)}${a.riskUnknown ? `, не оценено позиций: ${a.riskUnknown}` : ''}.`,
+    ...(a.reds.length ? ['', 'Красные позиции:', ...[...a.reds].sort((x, y) => (y.risk || 0) - (x.risk || 0)).map((r) => `• ${r.name}: запас ${fmtNum(r.stock)} дн., замена ${fmtNum(+r.replace)} дн., риск ${r.risk == null ? 'не оценён' : fmt(r.risk)}${r.owner ? ', ведёт ' + r.owner : ''}${r.nextStep ? '. ' + r.nextStep : ''}`), ''] : []), `Шагов плана выполнено: ${a.done30} из ${PLAN_30.length}.`, '',
     `Сделано: ${last.length ? last.join('; ') + '.' : 'записей пока нет.'}`,
     `Сегодня делаю: ${a.step30 || 'план закрыт, открываю улучшения'}.`, '',
     `Ждут вашего решения: ${a.pending}. Если ситуация изменится, сообщу сразу и с цифрами.`, '',

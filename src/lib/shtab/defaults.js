@@ -8,11 +8,16 @@ export const STATUS_META = {
   red: { label: 'КРАСНОЕ', cls: 'bg-[#9c1c1c] text-white' },
   yellow: { label: 'ЖЁЛТОЕ', cls: 'bg-[#e7b84a] text-graph' },
   green: { label: 'ЗЕЛЁНОЕ', cls: 'bg-mal text-white' },
+  unknown: { label: 'НЕПОЛНЫЕ ДАННЫЕ', cls: 'bg-[#e7b84a] text-graph' },
 };
 
 export const LEVELS = {
-  stable: { label: 'СТАБИЛЬНО: красного нет', cls: 'bg-mal' },
-  managed: { label: 'УПРАВЛЯЕМО: красное в работе', cls: 'bg-rose-deep' },
+  empty: { label: 'ОЦЕНКА НЕ НАЧАТА: светофор не заполнен', cls: 'bg-graph-2' },
+  incomplete: { label: 'ОЦЕНКА НЕ ЗАВЕРШЕНА: есть непроверенные позиции', cls: 'bg-rose-deep' },
+  stable: { label: 'ЗАПАС ПОКРЫВАЕТ ЗАМЕНУ: проверенные позиции в зелёном', cls: 'bg-mal' },
+  watch: { label: 'ВНИМАНИЕ: есть разрыв в запасе по жёлтым позициям', cls: 'bg-rose-deep' },
+  unassigned: { label: 'ТРЕБУЕТСЯ ДЕЙСТВИЕ: по красному нет владельца или шага', cls: 'bg-[#9c1c1c]' },
+  managed: { label: 'КРАСНОЕ В РАБОТЕ: контролируйте следующий шаг', cls: 'bg-rose-deep' },
   overload: { label: 'ПЕРЕГРУЗ: красного больше, чем рук', cls: 'bg-[#9c1c1c]' },
 };
 
@@ -72,22 +77,22 @@ export const THREE_FIELDS = [
   ['rate', 'Ставка компании, % годовых', 'Стоимость денег для компании', 0.5],
   ['d0', 'Дней срыва в год, было', 'Ожидаемое число дней простоя', 1],
   ['d1', 'Дней срыва в год, стало', 'После резервного поставщика', 1],
-  ['dayc', 'Цена дня простоя, млн ₽', 'Потери выручки и штрафы за день', 0.5],
+  ['dayc', 'Цена дня простоя, млн ₽', 'Оценка потерь, согласованная с производством и финансами. Не вся дневная выручка автоматически.', 0.5],
 ];
 
 
 // Пустой старт: все цифры вносит пользователь
 export const DEFAULT_STATE = {
-  params: { slowShare: 50, breakDays: 7, people: 3 },
+  params: { slowShare: null, breakDays: null, people: null },
   items: [],
-  three: { spend: 0, price: 0, real: 0, defer: 0, stock: 0, rate: 0, d0: 0, d1: 0, dayc: 0 },
+  three: { spend: null, price: null, real: null, defer: null, stock: null, rate: null, d0: null, d1: null, dayc: null },
   decisions: [],
   done72: [],
   done30: [],
   team: [],
   journal: [],
 };
-export const newItem = () => ({ id: uid(), name: '', supplier: '', owner: '', unit: '', onhand: 0, perday: 0, stock: 0, replace: 0, dayCost: 0, effect: 'Замедлит', nextStep: '' });
+export const newItem = () => ({ id: uid(), name: '', supplier: '', owner: '', unit: '', onhand: null, perday: null, stock: null, replace: null, dayCost: null, effect: '', nextStep: '' });
 
 // Только для демонстрации интерфейса. Значения условные и не являются данными предприятия.
 export const EXAMPLE_STATE = {

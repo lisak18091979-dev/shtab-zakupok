@@ -16,7 +16,7 @@ export default function Team({ state, patch, a }) {
     <Section kicker="Закупщику · Команда" title="Разгрузка команды" note="Решите по каждому делу недели. Люди важнее красивых планов. Скажите вслух, что вы сознательно не делаете.">
       <div className="flex flex-wrap gap-3 mb-6">
         {TEAM_DECISIONS.map((d) => <span key={d} className={`px-3 py-1.5 text-xs font-extrabold border-2 ${COLORS[d]}`}>{d}: {state.team.filter((t) => t.decision === d).length}</span>)}
-        <span className={`px-3 py-1.5 text-xs font-bold ${a.overload ? 'text-[#9c1c1c]' : 'text-mal'}`}>Красных {a.reds.length} на {p} чел. {a.overload ? 'Перегруз.' : 'Нагрузка держится.'}</span>
+        <span className={`px-3 py-1.5 text-xs font-bold ${a.overload ? 'text-[#9c1c1c]' : 'text-mal'}`}>Красных {p == null ? `${a.reds.length}, число людей не задано.` : `${a.reds.length} на ${p} чел. ${a.overload ? 'Перегруз.' : 'Нагрузка держится.'}`}</span>
       </div>
       <ul className="divide-y divide-cream-2 bg-cream-paper border border-cream-2">
         {state.team.map((t) => (

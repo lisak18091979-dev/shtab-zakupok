@@ -4,9 +4,10 @@ import { fmt } from '@/lib/shtab/calc';
 export default function StatusStrip({ a, state }) {
   const lv = LEVELS[a.level];
   const items = [
-    ['Красных', `${a.reds.length} на ${state.params.people} чел.`],
-    ['Риск не закрыт', fmt(a.risk)],
-    [`Обрыв на ${state.params.breakDays} дн.`, fmt(a.loss)],
+    ['Красных', state.params.people == null ? `${a.reds.length}, число людей не задано` : `${a.reds.length} на ${state.params.people} чел.`],
+    ['Не проверено', a.unknown.length],
+    ['Риск не закрыт', `${fmt(a.risk)}${a.riskUnknown ? ' + не оценено' : ''}`],
+    [state.params.breakDays == null ? 'Стресс-тест' : `Обрыв на ${state.params.breakDays} дн.`, state.params.breakDays == null ? 'Срок не выбран' : `${fmt(a.loss)}${a.lossUnknown ? ' + не оценено' : ''}`],
     ['Ждут решения', a.pending],
   ];
   return (

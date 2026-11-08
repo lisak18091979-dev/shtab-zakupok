@@ -4,7 +4,7 @@ import { fmtNum } from '@/lib/shtab/calc';
 
 export default function TrafficRow({ row, onChange, onDelete }) {
   const num = (k, cls = '') => (
-    <input type="number" step="any" className={`field text-right ${cls}`} value={row[k] ?? 0} onChange={(e) => onChange(k, +e.target.value)} />
+    <input type="number" min="0" step="any" placeholder="Не внесено" className={`field text-right ${cls}`} value={row[k] ?? ''} onChange={(e) => onChange(k, e.target.value === '' ? null : +e.target.value)} />
   );
   const txt = (k, ph, cls = '') => (
     <input className={`field ${cls}`} placeholder={ph} value={row[k] ?? ''} onChange={(e) => onChange(k, e.target.value)} />
@@ -24,12 +24,13 @@ export default function TrafficRow({ row, onChange, onDelete }) {
         <td className="p-2 w-24">{num('dayCost')}</td>
         <td className="p-2 w-40">
           <select className="field" value={row.effect} onChange={(e) => onChange('effect', e.target.value)}>
+            <option value="">Выберите</option>
             {EFFECTS.map((e) => <option key={e}>{e}</option>)}
           </select>
         </td>
-        <td className="p-2 text-center font-bold">{filled ? fmtNum(row.unc) : '—'}</td>
+        <td className="p-2 text-center font-bold">{filled ? row.unc == null ? '—' : fmtNum(row.unc) : '—'}</td>
         <td className="p-2">{filled && <span className={`inline-block px-2 py-1 text-[10px] font-extrabold tracking-[0.1em] ${st.cls}`}>{st.label}</span>}</td>
-        <td className="p-2 text-right font-extrabold font-heading text-base">{filled ? fmtNum(row.risk) : '—'}</td>
+        <td className="p-2 text-right font-extrabold font-heading text-base">{filled ? row.risk == null ? 'Не задано' : fmtNum(row.risk) : '—'}</td>
         <td className="p-2 text-right"><button onClick={onDelete} title="Удалить" className="p-1.5 text-muted-foreground hover:text-rose-deep"><Trash2 className="w-4 h-4" /></button></td>
       </tr>
       <tr className="bg-cream/60">

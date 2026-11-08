@@ -17,20 +17,20 @@ import OwnerPanel from '@/components/shtab/OwnerPanel';
 import ThreeNumbers from '@/components/shtab/ThreeNumbers';
 import Decisions from '@/components/shtab/Decisions';
 
-const H72 = (p) => <Checklist {...p} kicker="Закупщику · 72 часа" title="Первые 72 часа" note="Порядок записан заранее, чтобы не думать, когда ударило." steps={STEPS_72} doneKey="done72" />;
-const P30 = (p) => <Checklist {...p} kicker="Закупщику · 30 дней" title="План на тридцать дней" note="Улучшения разблокируются только после стабилизации." steps={PLAN_30} doneKey="done30" gate />;
+const H72 = (p) => <Checklist {...p} kicker="Закупщику · 72 часа" title="Первые 72 часа" note="Внесите ответственного, срок и то, что мешает выполнить шаг. Порядок действий записан заранее." steps={STEPS_72} doneKey="done72" />;
+const P30 = (p) => <Checklist {...p} kicker="Закупщику · 30 дней" title="План на тридцать дней" note="Сначала удержать производство. По каждому шагу назначьте ответственного, срок и решение, которое мешает, если оно есть." steps={PLAN_30} doneKey="done30" gate />;
 
 const VIEWS = { light: TrafficLight, stress: StressTest, h72: H72, plan30: P30, team: Team, phrases: Phrases, journal: Journal, summary: Summary, panel: OwnerPanel, three: ThreeNumbers, decisions: Decisions };
 const TABS = {
-  buyer: [['light', 'Светофор'], ['stress', 'Стресс тест'], ['h72', '72 часа'], ['plan30', 'План 30 дней'], ['team', 'Команда'], ['phrases', 'Фразы'], ['journal', 'Журнал'], ['summary', 'Сводка']],
-  owner: [['panel', 'Панель'], ['three', 'Три цифры'], ['decisions', 'Решения'], ['summary', 'Сводка']],
+  buyer: [['plan30', 'План 30 дней'], ['light', 'Светофор'], ['stress', 'Стресс тест'], ['h72', '72 часа'], ['team', 'Команда'], ['phrases', 'Фразы'], ['journal', 'Журнал'], ['summary', 'Сводка']],
+  owner: [['panel', 'Панель'], ['decisions', 'Решения'], ['summary', 'Сводка'], ['three', 'Финансы']],
 };
 
 export default function Shtab() {
   const { state, patch, reset, isExample, loadExample, returnToMyData } = useShtab();
   const a = useMemo(() => analyze(state), [state]);
   const [mode, setModeRaw] = useState('buyer');
-  const [tab, setTab] = useState('light');
+  const [tab, setTab] = useState('plan30');
   const setMode = (m) => { setModeRaw(m); setTab(TABS[m][0][0]); };
   const View = VIEWS[tab];
 

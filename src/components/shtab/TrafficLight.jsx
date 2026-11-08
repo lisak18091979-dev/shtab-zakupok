@@ -8,7 +8,6 @@ import CopyButton from './CopyButton';
 import { newItem, uid } from '@/lib/shtab/defaults';
 import { fmt, fmtNum } from '@/lib/shtab/calc';
 
-const HEAD = ['Позиция', 'Остаток', 'Расход в сутки', 'Запас, дн.', 'Замена, дн.', 'Цена дня простоя, млн ₽', 'Без поставки', 'Непокрыто', 'Статус', 'Риск, млн ₽', ''];
 const FILTERS = ['Все', 'Красное', 'Жёлтое', 'Зелёное', 'Неполные данные'];
 const FKEY = { Красное: 'red', Жёлтое: 'yellow', Зелёное: 'green' };
 const n = (v) => {
@@ -51,12 +50,12 @@ export default function TrafficLight({ state, patch, a }) {
       kicker="Закупщику · Светофор"
       title="Что может остановить линию"
       note="Красное: непокрытые дни есть и позиция остановит линию. Жёлтое: непокрытые дни есть. Зелёное: запаса хватает, не трогаем. Если указаны остаток и расход в сутки, запас в днях считается сам."
-      right={<div className="flex gap-6">
+      right={<div className="flex flex-wrap gap-6">
         <ChipGroup label="Замедление, доля цены дня, %" options={[25, 50, 75]} value={state.params.slowShare} onChange={setParam('slowShare')} />
         <ChipGroup label="Число людей в закупках" options={[1, 2, 3, 4, 5, 6]} value={state.params.people} onChange={setParam('people')} />
       </div>}
     >
-      <TodayCard a={a} people={state.params.people} />
+      {a.valid.length > 0 && <TodayCard a={a} people={state.params.people} />}
 
       {a.byOwner.length > 0 && (
         <div className="mt-6 bg-cream-paper border border-cream-2 p-5">
@@ -69,7 +68,7 @@ export default function TrafficLight({ state, patch, a }) {
               <div key={o} className={`border-2 p-3 ${list.length > 3 ? 'border-[#9c1c1c]' : 'border-graph'}`}>
                 <p className="font-extrabold">{o} <span className={list.length > 3 ? 'text-[#9c1c1c]' : 'text-mal'}>· {list.length}{list.length > 3 ? ', больше трёх' : ''}</span></p>
                 <ul className="mt-1 text-sm space-y-1">
-                  {list.map((r) => <li key={r.id}>{r.name}<span className="text-muted-foreground"> · риск {fmt(r.risk)}</span>{r.nextStep ? <span className="block text-xs text-muted-foreground">{r.nextStep}</span> : null}</li>)}
+                  {list.map((r) => <li key={r.id}>{r.name}<span className="text-muted-foreground"> · риск {r.risk == null ? 'не оценён' : fmt(r.risk)}</span>{r.nextStep ? <span className="block text-xs text-muted-foreground">{r.nextStep}</span> : null}</li>)}
                 </ul>
               </div>
             ))}
@@ -83,15 +82,9 @@ export default function TrafficLight({ state, patch, a }) {
       </div>
 
       {a.rows.length === 0 && <p className="mt-4 bg-cream-paper border border-cream-2 p-5 text-sm">Список пуст. Добавьте позицию вручную или вставьте строки из Excel. Готовых цифр здесь нет, всё берётся из ваших данных.</p>}
-      <div className="mt-4 overflow-x-auto bg-cream-paper border border-cream-2">
-        <table className="w-full min-w-[1000px] text-sm">
-          <thead className="bg-graph text-rose-light">
-            <tr>{HEAD.map((h) => <th key={h} className="p-2.5 text-left text-[10px] font-extrabold uppercase tracking-[0.1em]">{h}</th>)}</tr>
-          </thead>
-          <tbody>
-            {rows.map((r) => <TrafficRow key={r.id} row={r} onChange={(k, v) => upd(r.id, k, v)} onDelete={() => del(r.id)} />)}
-          </tbody>
-        </table>
+      <div className="mt-6 space-y-6">
+        {rows.map((r, i) => <TrafficRow key={r.id} row={r} index={i} onChange={(k, v) => upd(r.id, k, v)} onDelete={() => del(r.id)} />)}
+        {a.rows.length > 0 && rows.length === 0 && <p className="bg-cream-paper border border-cream-2 p-8 text-center text-sm text-muted-foreground">По выбранному условию позиций нет.</p>}
       </div>
       <div className="mt-4 flex flex-wrap gap-3">
         <button onClick={add} className="btn-ghost"><Plus className="w-4 h-4" /> Добавить позицию</button>

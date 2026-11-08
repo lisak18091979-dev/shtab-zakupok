@@ -13,12 +13,18 @@ export const fmtNum = (n) => (n || 0).toLocaleString('ru-RU', { maximumFractionD
 const factor = (effect, slow) => (effect === 'Остановит линию' ? 1 : effect === 'Замедлит' ? (slow == null ? null : slow / 100) : 0);
 const sumKnown = (rows, k) => rows.reduce((s, r) => s + (Number.isFinite(r[k]) ? r[k] : 0), 0);
 
+export function coverageOf(it) {
+  const inventoryMode = it.stockMode || (it.onhand != null && +it.perday > 0 ? 'quantity' : it.stock != null ? 'days' : 'quantity');
+  const auto = inventoryMode === 'quantity' && it.onhand != null && +it.perday > 0;
+  const stockKnown = inventoryMode === 'quantity' ? auto : it.stock != null;
+  const stock = auto ? Math.round((+it.onhand / +it.perday) * 10) / 10 : stockKnown ? +it.stock : 0;
+  return { inventoryMode, auto, stockKnown, stock };
+}
+
 export function analyze(state) {
   const { params: p, three: t } = state;
   const rows = state.items.map((it) => {
-    const auto = it.onhand != null && +it.perday > 0;
-    const stockKnown = auto || it.stock != null;
-    const stock = auto ? Math.round((+it.onhand / +it.perday) * 10) / 10 : (+it.stock || 0);
+    const { inventoryMode, auto, stockKnown, stock } = coverageOf(it);
     const replacementKnown = it.replace != null, effectKnown = ['Остановит линию', 'Замедлит', 'Заменим сразу'].includes(it.effect);
     const costKnown = it.dayCost != null && +it.dayCost > 0, cost = +it.dayCost || 0, f = factor(it.effect, p.slowShare);
     const complete = stockKnown && replacementKnown && effectKnown;
@@ -35,7 +41,7 @@ export function analyze(state) {
     const lossDays = p.breakDays == null || !stockKnown ? null : Math.max(0, p.breakDays - stock);
     const loss = lossDays == null ? null : lossDays === 0 ? 0 : !complete ? null : f === 0 ? 0 : f == null || !costKnown ? null : lossDays * cost * f;
     return {
-      ...it, name: it.name || '', auto, stock, stockKnown, unc, status, missing, incomplete: missing.length > 0,
+      ...it, name: it.name || '', manualStock: it.stock ?? null, inventoryMode, auto, stock, stockKnown, unc, status, missing, incomplete: missing.length > 0,
       risk, loss,
     };
   });

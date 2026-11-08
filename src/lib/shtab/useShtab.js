@@ -1,24 +1,26 @@
 import { useEffect, useState } from 'react';
 import { DEFAULT_STATE, EXAMPLE_STATE } from './defaults';
 
-const KEY = 'shtab-zakupok-v2';
+const KEY = 'shtab-zakupok-v3';
+const LEGACY = 'shtab-zakupok-v2';
+const HANDLED = 'shtab-zakupok-legacy-handled';
 const fresh = () => structuredClone(DEFAULT_STATE);
-const loadSaved = () => {
+const readState = (key) => {
   try {
-    const saved = JSON.parse(localStorage.getItem(KEY) || '{}');
-    if (saved.three && Object.values(saved.three).every((v) => Number(v) === 0)) {
-      saved.three = Object.fromEntries(Object.keys(DEFAULT_STATE.three).map((k) => [k, null]));
-    }
-    return { ...fresh(), ...saved };
+    const saved = JSON.parse(localStorage.getItem(key) || '{}');
+    const base = fresh();
+    return { ...base, ...saved, params: { ...base.params, ...saved.params }, three: { ...base.three, ...saved.three } };
   } catch {
     return fresh();
   }
 };
+const loadSaved = () => readState(KEY);
 
 // Данные штаба хранятся только в этом браузере
 export default function useShtab() {
   const [state, setState] = useState(loadSaved);
   const [isExample, setIsExample] = useState(false);
+  const [legacyAvailable, setLegacyAvailable] = useState(() => !!localStorage.getItem(LEGACY) && !localStorage.getItem(HANDLED));
 
   useEffect(() => {
     if (!isExample) localStorage.setItem(KEY, JSON.stringify(state));
@@ -30,6 +32,10 @@ export default function useShtab() {
     setState(loadSaved()); setIsExample(false);
   };
   const reset = () => { localStorage.removeItem(KEY); setState(fresh()); setIsExample(false); };
+  const dismissLegacy = () => { localStorage.setItem(HANDLED, '1'); setLegacyAvailable(false); };
+  const restoreLegacy = () => {
+    setState(readState(LEGACY)); setIsExample(false); dismissLegacy();
+  };
 
-  return { state, patch, reset, isExample, loadExample, returnToMyData };
+  return { state, patch, reset, isExample, loadExample, returnToMyData, legacyAvailable, restoreLegacy, dismissLegacy };
 }

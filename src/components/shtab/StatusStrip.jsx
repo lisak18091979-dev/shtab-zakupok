@@ -3,6 +3,10 @@ import { fmt } from '@/lib/shtab/calc';
 
 export default function StatusStrip({ a, state }) {
   const lv = LEVELS[a.level];
+  if (!a.valid.length) return <div className="bg-graph-2 text-cream"><div className="max-w-6xl mx-auto px-5 py-5 flex flex-wrap items-center justify-between gap-2">
+    <p className="text-xs font-extrabold tracking-[0.15em]">ШТАБ ГОТОВ К РАБОТЕ</p>
+    <p className="text-sm text-cream/75">Внесите свои позиции или отдельно загрузите учебный пример. Готовых расчётов нет.</p>
+  </div></div>;
   const items = [
     ['Красных', state.params.people == null ? `${a.reds.length}, число людей не задано` : `${a.reds.length} на ${state.params.people} чел.`],
     ['Не проверено', a.unknown.length],

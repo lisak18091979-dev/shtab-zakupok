@@ -1,6 +1,7 @@
 import { FileSpreadsheet, Printer, RotateCcw } from 'lucide-react';
 import { buildShtabXlsx } from '@/lib/export/xlsx';
 import { saveBlob } from '@/lib/export/download';
+import { coverageOf } from '@/lib/shtab/calc';
 
 const MODES = [['buyer', 'Закупщику'], ['owner', 'Собственнику']];
 
@@ -21,7 +22,7 @@ export default function ShtabTop({ mode, setMode, state, reset, isExample, loadE
         </div>
         <div className="flex items-center gap-1">
           {isExample ? <button onClick={returnToMyData} className="px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.08em] border border-rose-light hover:bg-graph-2">Вернуться к моим данным</button> : <button onClick={loadExample} className="px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.08em] border border-rose-light hover:bg-graph-2">Загрузить пример</button>}
-          <button onClick={() => saveBlob(buildShtabXlsx({ ...state, items: state.items.map((it) => (it.onhand != null && +it.perday > 0 ? { ...it, stock: Math.round((it.onhand / it.perday) * 10) / 10 } : it)) }), 'Штаб закупок.xlsx')} className="flex items-center gap-1.5 bg-mal text-white px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.12em] hover:bg-mal-light">
+          <button onClick={() => saveBlob(buildShtabXlsx({ ...state, items: state.items.map((it) => { const c = coverageOf(it); return { ...it, stock: c.stockKnown ? c.stock : null }; }) }), 'Штаб закупок.xlsx')} className="flex items-center gap-1.5 bg-mal text-white px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.12em] hover:bg-mal-light">
             <FileSpreadsheet className="w-4 h-4" /> Excel
           </button>
           <button onClick={() => window.print()} title="Распечатать" className={icon}><Printer className="w-4 h-4" /></button>

@@ -1,8 +1,21 @@
 import { Trash2 } from 'lucide-react';
+import { useLayoutEffect, useRef } from 'react';
 import { EFFECTS, STATUS_META } from '@/lib/shtab/defaults';
 import { fmt, fmtNum } from '@/lib/shtab/calc';
 
 export default function TrafficRow({ row, index, onChange, onDelete }) {
+  const nameRef = useRef(null), actionRef = useRef(null);
+  useLayoutEffect(() => {
+    const fit = () => [nameRef, actionRef].forEach((ref) => {
+      if (!ref.current) return;
+      ref.current.style.height = '0px';
+      ref.current.style.height = `${ref.current.scrollHeight + 2}px`;
+    });
+    fit();
+    document.fonts?.ready.then(fit);
+    window.addEventListener('resize', fit);
+    return () => window.removeEventListener('resize', fit);
+  }, [row.name, row.nextStep]);
   const mode = row.inventoryMode;
   const st = STATUS_META[row.status];
   const filled = !!row.name.trim();
@@ -11,13 +24,13 @@ export default function TrafficRow({ row, index, onChange, onDelete }) {
   const text = (k, name) => <input aria-label={name} className="field" placeholder="Не внесено" value={row[k] || ''} onChange={(e) => onChange(k, e.target.value)} />;
   return (
     <article className="supply-card">
-      <header className="flex items-start gap-3 sm:gap-5 border-b border-cream-2 px-5 py-5 sm:px-7">
+      <header className="flex flex-wrap sm:flex-nowrap items-start gap-3 sm:gap-5 border-b border-cream-2 px-5 py-5 sm:px-7">
         <span className="hidden sm:grid place-items-center w-9 h-9 shrink-0 bg-cream-2 text-mal font-bold text-sm">{String(index + 1).padStart(2, '0')}</span>
-        <label className="flex-1 min-w-0">
+        <label className="order-2 sm:order-none basis-full sm:basis-auto flex-1 min-w-0">
           <span className="field-label">Позиция</span>
-          <textarea aria-label="Позиция" rows={2} placeholder="Наименование материала или комплектующего" className="field font-bold text-base resize-y min-h-[76px]" value={row.name} onChange={(e) => onChange('name', e.target.value)} />
+          <textarea ref={nameRef} aria-label="Позиция" rows={2} placeholder="Наименование материала или комплектующего" className="field font-bold text-base resize-y min-h-[76px]" value={row.name} onChange={(e) => onChange('name', e.target.value)} />
         </label>
-        <div className="flex flex-col items-end gap-3 shrink-0">
+        <div className="order-1 sm:order-none flex sm:flex-col items-center sm:items-end justify-between gap-3 shrink-0 w-full sm:w-auto">
           {filled && <span className={`status-badge ${st.cls}`}>{st.label}</span>}
           <button onClick={onDelete} title="Удалить позицию" aria-label={`Удалить позицию ${row.name || index + 1}`} className="p-2 text-muted-foreground hover:text-rose-deep border border-cream-2 hover:border-rose"><Trash2 className="w-4 h-4" /></button>
         </div>
@@ -53,7 +66,7 @@ export default function TrafficRow({ row, index, onChange, onDelete }) {
         <div className="grid sm:grid-cols-2 gap-4 sm:gap-x-5">
           {label('Поставщик', text('supplier', 'Поставщик'))}
           {label('Ответственный', text('owner', 'Ответственный'))}
-          {label('Следующее действие и срок', <textarea aria-label="Следующее действие и срок" rows={2} className="field resize-y min-h-[76px]" placeholder="Что сделать, к какому сроку и какой результат получить" value={row.nextStep || ''} onChange={(e) => onChange('nextStep', e.target.value)} />, true)}
+          {label('Следующее действие и срок', <textarea ref={actionRef} aria-label="Следующее действие и срок" rows={2} className="field resize-y min-h-[76px]" placeholder="Что сделать, к какому сроку и какой результат получить" value={row.nextStep || ''} onChange={(e) => onChange('nextStep', e.target.value)} />, true)}
         </div>
         {filled && row.missing.length > 0 && <p className="mt-4 text-xs leading-relaxed text-rose-deep"><b>Уточнить:</b> {row.missing.join('; ')}.</p>}
       </footer>

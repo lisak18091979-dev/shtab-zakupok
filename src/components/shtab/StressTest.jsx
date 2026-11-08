@@ -38,7 +38,7 @@ export default function StressTest({ state, patch, a }) {
         </div>
         <div className="mt-7 border border-cream-2 bg-cream-paper">
           <div className="p-5 sm:p-6 flex flex-wrap items-end justify-between gap-5 border-b border-cream-2">
-            <div><p className="kicker">Последствия по позициям</p><p className="text-xs text-muted-foreground mt-2">Без полос, шкал и ползунков. Только проверяемые значения.</p></div>
+            <div><p className="kicker">Последствия по позициям</p><p className="text-xs text-muted-foreground mt-2">Запас, дни без покрытия и денежные последствия.</p></div>
             <div className="flex flex-wrap gap-5">
               <ChipGroup label="Показать" options={['Все позиции', 'С последствиями', 'Не оценены']} value={filter} onChange={setFilter} />
               <ChipGroup label="Порядок" options={['По запасу', 'По потерям']} value={order} onChange={setOrder} />

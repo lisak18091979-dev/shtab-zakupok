@@ -11,8 +11,19 @@ import { fmt, fmtNum } from '@/lib/shtab/calc';
 const HEAD = ['Позиция', 'Остаток', 'Расход в сутки', 'Запас, дн.', 'Замена, дн.', 'Цена дня простоя, млн ₽', 'Без поставки', 'Непокрыто', 'Статус', 'Риск, млн ₽', ''];
 const FILTERS = ['Все', 'Красное', 'Жёлтое', 'Зелёное', 'Неполные данные'];
 const FKEY = { Красное: 'red', Жёлтое: 'yellow', Зелёное: 'green' };
-const n = (v) => parseFloat(String(v ?? '').replace(/\s/g, '').replace(',', '.')) || 0;
-const effectOf = (t) => { const x = String(t || '').toLowerCase(); return !x.trim() ? '' : x.startsWith('ост') ? 'Остановит линию' : x.startsWith('зам') && x.includes('сраз') ? 'Заменим сразу' : 'Замедлит'; };
+const n = (v) => {
+  const text = String(v ?? '').trim();
+  if (!text) return null;
+  const value = Number(text.replace(/\s/g, '').replace(',', '.'));
+  return Number.isFinite(value) && value >= 0 ? value : null;
+};
+const effectOf = (t) => {
+  const x = String(t || '').trim().toLowerCase();
+  if (x.startsWith('ост')) return 'Остановит линию';
+  if (x.startsWith('замед')) return 'Замедлит';
+  if (x.startsWith('замен') && x.includes('сраз')) return 'Заменим сразу';
+  return '';
+};
 
 export default function TrafficLight({ state, patch, a }) {
   const [filter, setFilter] = useState('Все');

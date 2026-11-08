@@ -71,6 +71,7 @@ export default function TrafficLight({ state, patch, a }) {
         <ChipGroup label="Порядок" options={['Как внесено', 'По риску']} value={byRisk ? 'По риску' : 'Как внесено'} onChange={(v) => setByRisk(v === 'По риску')} />
       </div>
 
+      {a.rows.length === 0 && <p className="mt-4 bg-cream-paper border border-cream-2 p-5 text-sm">Список пуст. Добавьте позицию вручную или вставьте строки из Excel. Готовых цифр здесь нет, всё берётся из ваших данных.</p>}
       <div className="mt-4 overflow-x-auto bg-cream-paper border border-cream-2">
         <table className="w-full min-w-[1000px] text-sm">
           <thead className="bg-graph text-rose-light">

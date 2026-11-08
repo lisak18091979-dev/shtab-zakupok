@@ -33,7 +33,7 @@ export default function Decisions({ state, patch }) {
         ))}
       </div>
       <form onSubmit={add} className="mt-5 flex gap-2 max-w-2xl">
-        <input className="field" placeholder="Новый запрос, например: разрешить второго поставщика по упаковке" value={text} onChange={(e) => setText(e.target.value)} />
+        <input className="field" placeholder="Новый запрос, что нужно решить собственнику" value={text} onChange={(e) => setText(e.target.value)} />
         <button className="btn-dark shrink-0"><Plus className="w-4 h-4" /> Внести</button>
       </form>
     </Section>

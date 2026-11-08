@@ -1,22 +1,18 @@
 import Section from './Section';
 import NumInput from './NumInput';
-import { THREE_FIELDS, SCENARIOS } from '@/lib/shtab/defaults';
+import { THREE_FIELDS } from '@/lib/shtab/defaults';
 import { fmt } from '@/lib/shtab/calc';
 
 export default function ThreeNumbers({ state, patch, a }) {
   const t = state.three;
   const set = (k, v) => patch('three', (x) => ({ ...x, [k]: v }));
-  const active = Object.keys(SCENARIOS).find((n) => THREE_FIELDS.every(([k]) => SCENARIOS[n][k] === t[k]));
   const res = [
     ['1. Вклад в EBITDA в год', a.ebitda, `Экономия ${fmt((t.spend * t.price) / 100)} на бумаге, подтверждено ${t.real}%.`],
     ['2. Высвобождено из оборота', a.cash, `Единовременно. При ставке ${t.rate}% это ${fmt(a.interest)} процентов в год.`],
     ['3. Снижение риска в год', a.riskCut, `Дней срыва меньше на ${Math.max(0, t.d0 - t.d1)}, каждый стоит ${fmt(t.dayc)}.`],
   ];
   return (
-    <Section kicker="Собственнику · Три цифры" title="Вместо «экономии к цене»" note="Директор по закупкам отчитывается вкладом в EBITDA, деньгами из оборота и риском в рублях."
-      right={<div className="flex gap-1.5">{Object.keys(SCENARIOS).map((n) => (
-        <button key={n} onClick={() => patch('three', { ...SCENARIOS[n] })} className={`px-3 py-1.5 text-xs font-extrabold border-2 ${active === n ? 'bg-mal border-mal text-white' : 'border-graph hover:bg-graph hover:text-cream'}`}>{n}</button>
-      ))}</div>}>
+    <Section kicker="Собственнику · Три цифры" title="Вместо «экономии к цене»" note="Директор по закупкам отчитывается вкладом в EBITDA, деньгами из оборота и риском в рублях. Все цифры вносите вы, готовых значений нет.">
       <div className="grid md:grid-cols-3 gap-4">
         {res.map(([k, v, n]) => (
           <div key={k} className="bg-gradient-to-br from-[#3a3d43] to-graph text-cream p-6 border-b-8 border-rose">

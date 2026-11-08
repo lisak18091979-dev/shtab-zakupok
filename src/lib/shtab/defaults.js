@@ -75,36 +75,16 @@ export const THREE_FIELDS = [
   ['dayc', 'Цена дня простоя, млн ₽', 'Потери выручки и штрафы за день', 0.5],
 ];
 
-export const SCENARIOS = {
-  'Осторожный': { spend: 1500, price: 2, real: 50, defer: 7, stock: 3, rate: 16, d0: 6, d1: 4, dayc: 5 },
-  'Рабочий': { spend: 3000, price: 4, real: 60, defer: 15, stock: 8, rate: 16, d0: 10, d1: 5, dayc: 8 },
-  'Смелый': { spend: 6000, price: 6, real: 75, defer: 30, stock: 14, rate: 16, d0: 14, d1: 4, dayc: 15 },
-};
 
-// Пример данных для старта (как в исходном файле Excel)
+// Пустой старт: все цифры вносит пользователь
 export const DEFAULT_STATE = {
   params: { slowShare: 50, breakDays: 7, people: 3 },
-  items: [
-    { id: 'i1', name: 'Прокат круглый, сталь 40Х и 45', supplier: 'Металлургический комбинат, основной', owner: 'Закупщик 1', unit: 'т', onhand: 120, perday: 40, stock: 0, replace: 10, dayCost: 12, effect: 'Остановит линию', nextStep: 'Позвонить на комбинат, запросить частичную отгрузку и запросить цену у второго источника' },
-    { id: 'i2', name: 'Запчасти к прессам: гидравлика и уплотнения', supplier: 'Поставщик запчастей', owner: 'Закупщик 2', unit: 'комплект', onhand: 0, perday: 0, stock: 4, replace: 14, dayCost: 6, effect: 'Остановит линию', nextStep: 'Выяснить срок у производителя, проверить аналоги по чертежам' },
-    { id: 'i3', name: 'Штамповая сталь 5ХНМ для оснастки', supplier: 'Специализированный склад металла', owner: 'Закупщик 1', unit: 'т', onhand: 6, perday: 0.3, stock: 0, replace: 30, dayCost: 4, effect: 'Замедлит', nextStep: 'Подтвердить срок отгрузки, свериться с планом замены штампов' },
-    { id: 'i4', name: 'Смазка графитовая для штампов', supplier: 'Поставщик смазочных материалов', owner: 'Закупщик 3', unit: 'кг', onhand: 800, perday: 120, stock: 0, replace: 14, dayCost: 2, effect: 'Замедлит', nextStep: 'Заказать партию с запасом на три недели' },
-    { id: 'i5', name: 'Огнеупоры для нагревательных печей', supplier: 'Огнеупорный завод', owner: 'Закупщик 3', unit: 'т', onhand: 15, perday: 0.5, stock: 0, replace: 35, dayCost: 6, effect: 'Замедлит', nextStep: '' },
-    { id: 'i6', name: 'Тара и упаковка для отгрузки', supplier: 'Местный изготовитель', owner: 'Закупщик 2', unit: 'шт', onhand: 0, perday: 0, stock: 5, replace: 10, dayCost: 2.5, effect: 'Замедлит', nextStep: 'Подтвердить сроки и найти запасного изготовителя' },
-    { id: 'i7', name: 'Масло гидравлическое', supplier: 'Дистрибьютор масел', owner: 'Закупщик 2', unit: 'л', onhand: 9000, perday: 300, stock: 0, replace: 14, dayCost: 3, effect: 'Замедлит', nextStep: '' },
-    { id: 'i8', name: 'Режущий и абразивный инструмент', supplier: 'Несколько поставщиков', owner: 'Закупщик 3', unit: 'комплект', onhand: 0, perday: 0, stock: 15, replace: 10, dayCost: 0.8, effect: 'Заменим сразу', nextStep: '' },
-  ],
-  three: { ...SCENARIOS['Рабочий'] },
-  decisions: [{ id: 'd1', text: 'Разрешить оплату под отгрузку по прокату до 20 млн ₽', status: 'Ждёт решения', comment: '' }],
+  items: [],
+  three: { spend: 0, price: 0, real: 0, defer: 0, stock: 0, rate: 0, d0: 0, d1: 0, dayc: 0 },
+  decisions: [],
   done72: [],
   done30: [],
-  team: [
-    { id: 't1', text: 'Ежедневный звонок по красным позициям', decision: 'Оставить' },
-    { id: 't2', text: 'Еженедельный отчёт по экономии', decision: 'Отложить' },
-    { id: 't3', text: 'Согласование мелких заявок', decision: 'Передать' },
-    { id: 't4', text: 'Пересмотр рамочных договоров', decision: 'Отложить' },
-    { id: 't5', text: 'Анкеты и опросы от внутренних служб', decision: 'Убрать' },
-  ],
+  team: [],
   journal: [],
 };
 export const newItem = () => ({ id: uid(), name: '', supplier: '', owner: '', unit: '', onhand: 0, perday: 0, stock: 0, replace: 0, dayCost: 0, effect: 'Замедлит', nextStep: '' });

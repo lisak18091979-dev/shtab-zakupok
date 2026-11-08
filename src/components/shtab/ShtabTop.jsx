@@ -5,7 +5,7 @@ import { saveBlob } from '@/lib/export/download';
 const MODES = [['buyer', 'Закупщику'], ['owner', 'Собственнику']];
 
 export default function ShtabTop({ mode, setMode, state, reset }) {
-  const doReset = () => window.confirm('Вернуть пример данных? Ваши записи будут стёрты.') && reset();
+  const doReset = () => window.confirm('Очистить все данные? Ваши записи будут стёрты.') && reset();
   const icon = 'p-2 text-rose-light hover:text-white transition-colors';
   return (
     <header className="bg-graph text-rose-light sticky top-0 z-40 no-print">
@@ -25,7 +25,7 @@ export default function ShtabTop({ mode, setMode, state, reset }) {
           </button>
           <button onClick={() => { const b = new Blob(['<!DOCTYPE html>\n' + document.documentElement.outerHTML], { type: 'text/html' }); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'Штаб закупок.html'; a.click(); }} title="Скачать HTML" className={icon}><Download className="w-4 h-4" /></button>
           <button onClick={() => window.print()} title="Распечатать" className={icon}><Printer className="w-4 h-4" /></button>
-          <button onClick={doReset} title="Вернуть пример" className={icon}><RotateCcw className="w-4 h-4" /></button>
+          <button onClick={doReset} title="Очистить все данные" className={icon}><RotateCcw className="w-4 h-4" /></button>
         </div>
       </div>
     </header>

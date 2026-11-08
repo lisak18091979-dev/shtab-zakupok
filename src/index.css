@@ -1,0 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;0,800;1,700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 36 63% 91%;
+    --foreground: 220 9% 13%;
+    --card: 40 100% 97%;
+    --card-foreground: 220 9% 13%;
+    --popover: 40 100% 97%;
+    --popover-foreground: 220 9% 13%;
+    --primary: 220 9% 13%;
+    --primary-foreground: 353 54% 82%;
+    --secondary: 34 47% 84%;
+    --secondary-foreground: 220 9% 13%;
+    --muted: 34 47% 84%;
+    --muted-foreground: 220 6% 38%;
+    --accent: 353 30% 52%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 70% 45%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 34 35% 80%;
+    --input: 34 35% 78%;
+    --ring: 162 75% 24%;
+    --chart-1: 353 30% 52%;
+    --chart-2: 162 75% 24%;
+    --chart-3: 220 9% 13%;
+    --chart-4: 353 40% 67%;
+    --chart-5: 36 50% 60%;
+    --radius: 0.25rem;
+    --font-heading: 'Playfair Display', Georgia, serif;
+    --font-body: 'Manrope', Arial, sans-serif;
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+  }
+  h1, h2, h3 { @apply font-heading; }
+}
+
+@layer components {
+  .kicker { @apply text-[11px] font-extrabold uppercase tracking-[0.25em] text-mal; }
+  .btn-dark { @apply inline-flex items-center gap-2 bg-graph text-rose-light px-5 py-3 text-xs font-extrabold uppercase tracking-[0.14em] border-b-4 border-rose transition-all hover:bg-graph-2 hover:-translate-y-0.5; }
+  .btn-rose { @apply inline-flex items-center gap-2 bg-rose-deep text-white px-5 py-3 text-xs font-extrabold uppercase tracking-[0.14em] border-b-4 border-graph transition-all hover:-translate-y-0.5; }
+  .btn-ghost { @apply inline-flex items-center gap-2 border-2 border-graph px-4 py-2.5 text-xs font-extrabold uppercase tracking-[0.12em] transition-colors hover:bg-graph hover:text-cream; }
+  .field { @apply w-full bg-cream-paper border border-cream-2 px-3 py-2 text-sm font-semibold text-graph focus:outline-none focus:border-mal; }
+}
+
+@media print {
+  .no-print { display: none !important; }
+}

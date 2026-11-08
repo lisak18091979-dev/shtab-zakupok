@@ -27,7 +27,7 @@ const TABS = {
 };
 
 export default function Shtab() {
-  const { state, patch, reset } = useShtab();
+  const { state, patch, reset, isExample, loadExample, returnToMyData } = useShtab();
   const a = useMemo(() => analyze(state), [state]);
   const [mode, setModeRaw] = useState('buyer');
   const [tab, setTab] = useState('light');
@@ -36,7 +36,8 @@ export default function Shtab() {
 
   return (
     <div className="min-h-screen">
-      <ShtabTop mode={mode} setMode={setMode} state={state} reset={reset} />
+      <ShtabTop mode={mode} setMode={setMode} state={state} reset={reset} isExample={isExample} loadExample={loadExample} returnToMyData={returnToMyData} />
+      {isExample && <div className="bg-[#fff3cd] border-b-2 border-[#c9962b] px-5 py-3 text-center text-sm font-bold text-graph">Учебный пример. Все позиции и цифры условные, не данные ЧКПЗ или другого предприятия. Ваши данные сохранены отдельно. Нажмите «Вернуться к моим данным», чтобы восстановить их.</div>}
       <StatusStrip a={a} state={state} />
       <Tabs tabs={TABS[mode]} tab={tab} setTab={setTab} />
       <main className="max-w-6xl mx-auto px-5 py-12">

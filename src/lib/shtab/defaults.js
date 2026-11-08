@@ -88,3 +88,23 @@ export const DEFAULT_STATE = {
   journal: [],
 };
 export const newItem = () => ({ id: uid(), name: '', supplier: '', owner: '', unit: '', onhand: 0, perday: 0, stock: 0, replace: 0, dayCost: 0, effect: 'Замедлит', nextStep: '' });
+
+// Только для демонстрации интерфейса. Значения условные и не являются данными предприятия.
+export const EXAMPLE_STATE = {
+  params: { slowShare: 50, breakDays: 7, people: 3 },
+  items: [
+    { id: 'demo1', name: 'Сталь круглая 40Х, учебная позиция', supplier: 'Условный поставщик А', owner: 'Закупщик 1', unit: 'т', onhand: 18, perday: 1.5, stock: 12, replace: 24, dayCost: 4, effect: 'Остановит линию', nextStep: 'Запросить частичную отгрузку и подтвердить дату письмом' },
+    { id: 'demo2', name: 'Оснастка для прессового оборудования, учебная позиция', supplier: 'Условный поставщик Б', owner: 'Закупщик 2', unit: 'комплект', onhand: 0, perday: 0, stock: 3, replace: 30, dayCost: 2, effect: 'Остановит линию', nextStep: 'Уточнить возможность ремонта и проверить взаимозаменяемость' },
+    { id: 'demo3', name: 'Масло гидравлическое, учебная позиция', supplier: 'Условный поставщик В', owner: 'Закупщик 3', unit: 'л', onhand: 600, perday: 100, stock: 6, replace: 14, dayCost: 1, effect: 'Замедлит', nextStep: 'Подтвердить срок очередной партии' },
+    { id: 'demo4', name: 'Инструмент абразивный, учебная позиция', supplier: 'Условный поставщик Г', owner: 'Закупщик 1', unit: 'шт', onhand: 300, perday: 10, stock: 30, replace: 10, dayCost: 0.5, effect: 'Заменим сразу', nextStep: 'Проверить наличие у второго продавца' },
+  ],
+  three: { spend: 1000, price: 2, real: 50, defer: 5, stock: 2, rate: 15, d0: 6, d1: 4, dayc: 3 },
+  decisions: [{ id: 'demod1', text: 'Согласовать частичную поставку по учебной позиции', status: 'Ждёт решения', comment: 'Демонстрационная запись, не реальный запрос' }],
+  done72: [], done30: [],
+  team: [
+    { id: 'demot1', text: 'Подтвердить дату по красной позиции', decision: 'Оставить' },
+    { id: 'demot2', text: 'Сверить остаток по складу', decision: 'Передать' },
+    { id: 'demot3', text: 'Плановый обзор экономии', decision: 'Отложить' },
+  ],
+  journal: [{ id: 'demoj1', text: 'Демонстрационная запись: подтверждён срок поставки', date: new Date().toISOString() }],
+};

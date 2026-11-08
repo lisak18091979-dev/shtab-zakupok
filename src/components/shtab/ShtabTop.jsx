@@ -1,4 +1,4 @@
-import { Download, FileSpreadsheet, Printer, RotateCcw } from 'lucide-react';
+import { FileSpreadsheet, Printer, RotateCcw } from 'lucide-react';
 import { buildShtabXlsx } from '@/lib/export/xlsx';
 import { saveBlob } from '@/lib/export/download';
 
@@ -24,7 +24,6 @@ export default function ShtabTop({ mode, setMode, state, reset, isExample, loadE
           <button onClick={() => saveBlob(buildShtabXlsx({ ...state, items: state.items.map((it) => (+it.onhand > 0 && +it.perday > 0 ? { ...it, stock: Math.round((it.onhand / it.perday) * 10) / 10 } : it)) }), 'Штаб закупок.xlsx')} className="flex items-center gap-1.5 bg-mal text-white px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.12em] hover:bg-mal-light">
             <FileSpreadsheet className="w-4 h-4" /> Excel
           </button>
-          <button onClick={() => { const b = new Blob(['<!DOCTYPE html>\n' + document.documentElement.outerHTML], { type: 'text/html' }); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'Штаб закупок.html'; a.click(); }} title="Скачать HTML" className={icon}><Download className="w-4 h-4" /></button>
           <button onClick={() => window.print()} title="Распечатать" className={icon}><Printer className="w-4 h-4" /></button>
           <button onClick={doReset} title="Очистить все данные" className={icon}><RotateCcw className="w-4 h-4" /></button>
         </div>

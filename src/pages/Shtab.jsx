@@ -27,7 +27,7 @@ const TABS = {
 };
 
 export default function Shtab() {
-  const { state, patch, reset, isExample, loadExample, returnToMyData } = useShtab();
+  const { state, patch, reset, isExample, loadExample, returnToMyData, legacyAvailable, restoreLegacy, dismissLegacy } = useShtab();
   const a = useMemo(() => analyze(state), [state]);
   const [mode, setModeRaw] = useState('buyer');
   const [tab, setTab] = useState('plan30');
@@ -37,6 +37,15 @@ export default function Shtab() {
   return (
     <div className="min-h-screen">
       <ShtabTop mode={mode} setMode={setMode} state={state} reset={reset} isExample={isExample} loadExample={loadExample} returnToMyData={returnToMyData} />
+      {legacyAvailable && !isExample && <aside className="bg-cream-paper border-b border-cream-2">
+        <div className="max-w-6xl mx-auto px-5 py-5 flex flex-wrap items-center justify-between gap-4">
+          <div className="max-w-2xl"><p className="font-bold text-sm">Чистый старт без старых учебных цифр</p><p className="text-xs text-muted-foreground mt-1">Прежние записи сохранены отдельно. Они могли содержать учебный набор, поэтому автоматически их не загружаем.</p></div>
+          <div className="flex flex-wrap gap-2">
+            <button className="btn-ghost" onClick={() => window.confirm('Восстановить прежние записи вместо текущих? В них могут быть старые учебные цифры. Исходная копия прежних записей останется сохранённой.') && restoreLegacy()}>Восстановить прежние записи</button>
+            <button className="btn-ghost" onClick={dismissLegacy}>Оставить текущие</button>
+          </div>
+        </div>
+      </aside>}
       {isExample && <div className="bg-[#fff3cd] border-b-2 border-[#c9962b] px-5 py-3 text-center text-sm font-bold text-graph">Учебный пример. Все позиции и цифры условные, не данные ЧКПЗ или другого предприятия. Ваши данные сохранены отдельно. Нажмите «Вернуться к моим данным», чтобы восстановить их.</div>}
       <StatusStrip a={a} state={state} />
       <Tabs tabs={TABS[mode]} tab={tab} setTab={setTab} />
